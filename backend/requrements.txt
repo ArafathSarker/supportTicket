@@ -1,3 +1,26 @@
 asgiref==3.12.1
 Django==6.1.2
 sqlparse==0.6.0
+
+# REST API
+djangorestframework
+djangorestframework-simplejwt
+
+# CORS
+django-cors-headers
+
+# WebSockets / Channels
+channels
+channels-redis
+
+# ASGI server (HTTP + WebSocket)
+uvicorn[standard]
+daphne
+
+# PostgreSQL (production)
+psycopg[binary]
+dj-database-url
+
+# S3-compatible storage (Supabase S3-compatible endpoint)
+django-storages
+boto3

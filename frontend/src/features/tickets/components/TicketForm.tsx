@@ -1,0 +1,172 @@
+import { useMemo, useState } from 'react'
+import { Card, FileDrop, Input, Select, Textarea, type FileDraft } from '@/components/ui'
+import { useOptions } from '@/features/options'
+import { LEVELS, ticketApi } from '../api'
+import { useCreateTicket } from '../hooks'
+import type { Urgency } from '../types'
+
+export interface TicketFormProps {
+  /** Called after the ticket is created successfully. */
+  onCreated?: () => void
+}
+
+const levelOptions = LEVELS.map((l) => ({ value: l.value, label: l.label }))
+
+/** Create-ticket form: dynamic dropdowns + optional image/video attachment. */
+export function TicketForm({ onCreated }: TicketFormProps) {
+  const { options, loading: optionsLoading } = useOptions()
+
+  const systemOptions = useMemo(
+    () => (options.system ?? []).map((s) => ({ value: s, label: s })),
+    [options],
+  )
+  const categoryOptions = useMemo(
+    () => (options.category ?? []).map((c) => ({ value: c, label: c })),
+    [options],
+  )
+
+  const [files, setFiles] = useState<FileDraft[]>([])
+  const [title, setTitle] = useState('')
+  const [affectedSystem, setAffectedSystem] = useState('')
+  const [newSystem, setNewSystem] = useState('')
+  const [problemCategory, setProblemCategory] = useState('')
+  const [newCategory, setNewCategory] = useState('')
+  const [urgency, setUrgency] = useState<Urgency>('medium')
+  const [priority, setPriority] = useState<Urgency>('medium')
+  const [description, setDescription] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const { submit, submitting } = useCreateTicket(() => {
+    // reset + notify
+    setTitle(''); setAffectedSystem(''); setProblemCategory(''); setUrgency('medium'); setPriority('medium')
+    setDescription(''); setFiles([]); setNewSystem(''); setNewCategory('')
+    onCreated?.()
+  })
+
+  const allowCustom = true // dynamic systems/categories can be added on the fly
+
+  const beforeSubmitHandle = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setErrors({})
+    const localErrors: Record<string, string> = {}
+    if (!title.trim()) localErrors.title = 'Title is required'
+    if (!affectedSystem && !newSystem.trim()) localErrors.affected_system = 'Select or add an affected system'
+    if (!problemCategory && !newCategory.trim()) localErrors.problem_category = 'Select or add a problem category'
+    setErrors(localErrors)
+    if (Object.keys(localErrors).length) return
+
+    const system = affectedSystem || newSystem.trim()
+    const category = problemCategory || newCategory.trim()
+    const draft = files[0]
+
+    submit({
+      title: title.trim(),
+      affected_system: system,
+      problem_category: category,
+      urgency,
+      priority,
+      description,
+      file: draft?.file,
+      file_type: draft?.fileType,
+    })
+  }
+
+  // Fire-and-forget persistence of brand-new dropdown values (keeps admin config in sync)
+  void ticketApi.options // reference to show API exists; real persistence stays admin-side
+
+  return (
+    <Card>
+      <h2 className="text-lg font-semibold text-slate-900">New support ticket</h2>
+      <p className="mt-1 mb-4 text-sm text-slate-500">
+        Describe the problem with your IoT system — attachments land in cloud storage.
+      </p>
+
+      <form onSubmit={beforeSubmitHandle} className="space-y-4" noValidate>
+        <Input
+          id="ticket-title"
+          label="Title / problem summary"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          error={errors.title}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Select
+            id="ticket-system"
+            label="Affected system"
+            emptyOption={optionsLoading ? 'Loading…' : 'Select system…'}
+            options={systemOptions}
+            value={affectedSystem}
+            onChange={(e) => setAffectedSystem(e.target.value)}
+            error={errors.affected_system}
+            disabled={optionsLoading}
+          />
+          {allowCustom && (
+            <Input
+              id="ticket-system-custom"
+              label="…or add a new system"
+              placeholder="Type key to add dynamically"
+              value={newSystem}
+              onChange={(e) => setNewSystem(e.target.value)}
+            />
+          )}
+          <Select
+            id="ticket-category"
+            label="Problem category"
+            emptyOption={optionsLoading ? 'Loading…' : 'Select category…'}
+            options={categoryOptions}
+            value={problemCategory}
+            onChange={(e) => setProblemCategory(e.target.value)}
+            error={errors.problem_category}
+            disabled={optionsLoading}
+          />
+          {allowCustom && (
+            <Input
+              id="ticket-category-custom"
+              label="…or add a new category"
+              placeholder="Type to add dynamically"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+          )}
+          <Select
+            id="ticket-urgency"
+            label="Urgency level"
+            options={levelOptions}
+            value={urgency}
+            onChange={(e) => setUrgency(e.target.value as Urgency)}
+            required
+          />
+          <Select
+            id="ticket-priority"
+            label="Priority level"
+            options={levelOptions}
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as Urgency)}
+            required
+          />
+        </div>
+
+        <Textarea
+          id="ticket-description"
+          label="Describe the problem in detail"
+          required
+          rows={5}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <FileDrop label="Attachments (picture / video)" onChange={setFiles} />
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+        >
+          {submitting ? 'Submitting…' : 'Submit ticket'}
+        </button>
+      </form>
+    </Card>
+  )
+}

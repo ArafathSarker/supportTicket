@@ -1,0 +1,41 @@
+from django.contrib.auth.models import User
+
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from .models import Company, Profile
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['id', 'name', 'contact_email', 'created_at']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(source='profile.role', read_only=True)
+    company = serializers.PrimaryKeyRelatedField(
+        source='profile.company', read_only=True
+    )
+    company_name = serializers.CharField(
+        source='profile.company.name', read_only=True
+    )
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'company', 'company_name']
+
+
+class RoleTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """JWT login that also returns the resolved role & company."""
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['role'] = getattr(getattr(user, 'profile', None), 'role', '')
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['user'] = UserSerializer(self.user).data
+        return data
