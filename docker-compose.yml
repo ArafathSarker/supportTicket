@@ -47,8 +47,6 @@ services:
       SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET:-tickets}
     volumes:
       - media:/app/media
-    ports:
-      - '8000:8000'
 
   frontend:
     build: ./frontend
