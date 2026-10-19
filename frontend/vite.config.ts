@@ -12,6 +12,10 @@ export default defineConfig({
     },
   },
   server: {
+    // Override with `npm run dev -- --port 8080` or VITE_PORT, avoid clashing
+    // with other dev servers on this machine.
+    port: Number(process.env.VITE_PORT) || 5173,
+    strictPort: false, // if busy, vite picks the next free port
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
