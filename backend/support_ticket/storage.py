@@ -44,7 +44,9 @@ class SupportS3Storage(S3Storage):
         kwargs.setdefault('bucket_name', setting('S3_BUCKET', 'tickets'))
         kwargs.setdefault('file_overwrite', False)
         kwargs.setdefault('default_acl', 'public-read')
-        kwargs.setdefault('querystring_auth', False)
+        # Private buckets are the safe default; Django will generate a
+        # temporary signed URL when the attachment is read.
+        kwargs.setdefault('querystring_auth', True)
         super().__init__(*args, **kwargs)
 
     def _get_boto_client(self):

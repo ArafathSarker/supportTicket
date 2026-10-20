@@ -39,6 +39,9 @@ env/
 db.sqlite3
 db.sqlite3-journal
 
+# Django media (local attachment-storage fallback; Supabase S3 in production)
+backend/media/
+
 # Django collected static files
 staticfiles/
 

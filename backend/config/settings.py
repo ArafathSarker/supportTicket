@@ -7,8 +7,8 @@ Host projects only need from this file:
 - the storage backend wiring when S3 storage is enabled
 
 Environment-driven:
-- Dev:   SQLite + in-memory channel layer + local file storage
-- Prod:  Postgres + Redis channel layer + S3-compatible storage
+- Postgres (dev + production), Redis channel layer when REDIS_URL is set,
+  S3-compatible media storage when the S3 credentials are set.
 """
 import os
 from datetime import timedelta
@@ -83,19 +83,23 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # ---------------------------------------------------------------------------
-# Database — Postgres in production, SQLite for local dev
+# Database — PostgreSQL everywhere (dev + production).
+# Override with DATABASE_URL (docker compose sets it to the `db` service).
+# Default below targets a local Postgres with the compose credentials.
 # ---------------------------------------------------------------------------
-if os.getenv('DATABASE_URL'):
-    import dj_database_url
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
-    DATABASES = {'default': dj_database_url.parse(os.getenv('DATABASE_URL'))}
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+DATABASES = {
+    'default': dj_database_url.parse(
+        os.getenv('DATABASE_URL', 'postgres://support:support@localhost:5432/support')
+    ),
+}
+if not str(DATABASES['default'].get('ENGINE', '')).endswith('postgresql'):
+    raise ImproperlyConfigured(
+        'This project requires PostgreSQL. Set DATABASE_URL to a '
+        'postgres://... URL (see .env.example / docker-compose.yml).'
+    )
 
 # ---------------------------------------------------------------------------
 # Channels — Redis in production, in-memory for dev
@@ -132,6 +136,9 @@ SUPPORT_TICKET = {
     'S3_REGION': os.getenv('SUPABASE_S3_REGION', 'auto'),
     'S3_BUCKET': os.getenv('SUPABASE_STORAGE_BUCKET', 'tickets'),
 }
+# Used by the reusable app migration to create the company relation without
+# depending on this demo project's `accounts` app.
+SUPPORT_TICKET_COMPANY_MODEL = SUPPORT_TICKET['COMPANY_MODEL']
 
 # ---------------------------------------------------------------------------
 # Storage — S3-compatible in production, local media in dev

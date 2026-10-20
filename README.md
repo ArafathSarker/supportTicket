@@ -16,7 +16,13 @@ Docker Compose, and demo seed data.
 
 ## Quick start (local dev)
 
+The stack runs on **PostgreSQL** everywhere (no SQLite). Easiest: start the
+compose `db` (+ `redis`) service first, then run Django and Vite locally.
+
 ```bash
+# 0. Start Postgres + Redis from Docker (uses support/support@localhost:5432)
+docker compose up -d db redis
+
 # 1. Backend — http://localhost:8000
 cd backend
 python -m venv .venv && source .venv/bin/activate
@@ -30,6 +36,9 @@ cd frontend
 npm install
 npm run dev
 ```
+
+A remote/hosted Postgres also works — set `DATABASE_URL` (.env, see
+`.env.example`) and run migrate/seed against it.
 
 Demo accounts (created by `seed_demo`):
 
@@ -75,6 +84,8 @@ docker compose up --build
        # 'COMPANY_SERIALIZER': 'myapp.serializers.CompanySerializer',
        'PAGE_SIZE': 10,
    }
+   # Required by the support-ticket migration (use your own company model).
+   SUPPORT_TICKET_COMPANY_MODEL = 'myapp.Organization'
    ```
 
    Defaults work without any host hooks: Django superusers are `super_admin`,

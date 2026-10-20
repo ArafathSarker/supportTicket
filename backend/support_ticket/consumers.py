@@ -64,7 +64,8 @@ class TicketChatConsumer(AsyncJsonWebsocketConsumer):
             ticket = Ticket.objects.get(pk=self.ticket_id)
         except Ticket.DoesNotExist:
             return False
-        return ticket.created_by_id == user.id
+        company = conf.user_company(user)
+        return company is not None and ticket.company_id == company.pk
 
     @database_sync_to_async
     def save_message(self, user, content):

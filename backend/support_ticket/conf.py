@@ -59,7 +59,11 @@ def setting(name, default=None):
 
 def company_model_label():
     """The related company model as '<app_label>.<ModelName>'."""
-    label = setting('COMPANY_MODEL')
+    # Keep the model label as a normal Django setting so the app migration can
+    # declare a swappable dependency instead of depending on a demo app.
+    label = getattr(settings, 'SUPPORT_TICKET_COMPANY_MODEL', None) or setting(
+        'COMPANY_MODEL'
+    )
     if not label:
         from django.core.exceptions import ImproperlyConfigured
 

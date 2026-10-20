@@ -59,7 +59,7 @@ class Ticket(models.Model):
     Priority = Urgency  # same fixed levels
 
     company = models.ForeignKey(
-        company_model_label(),
+        settings.SUPPORT_TICKET_COMPANY_MODEL,
         on_delete=models.CASCADE,
         related_name='support_tickets',
     )
@@ -146,7 +146,7 @@ class VisitingLog(models.Model):
         help_text='Ticket being acknowledged / followed up by this visit.',
     )
     company = models.ForeignKey(
-        company_model_label(),
+        settings.SUPPORT_TICKET_COMPANY_MODEL,
         on_delete=models.CASCADE,
         related_name='visiting_logs',
     )

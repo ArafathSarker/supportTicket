@@ -2,6 +2,7 @@ from django.db.models import Q
 
 from rest_framework import generics, permissions, serializers, viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 
 from . import conf
 from .models import DynamicOption, Ticket, TicketAttachment, TicketMessage, VisitingLog
@@ -28,6 +29,15 @@ def companies_qs(user):
     if own is None:
         return model.objects.none()
     return model.objects.filter(pk=own.pk)
+
+
+def accessible_ticket_qs(user):
+    """Return only tickets the current role is allowed to inspect."""
+    qs = Ticket.objects.all()
+    if conf.is_super_admin(user):
+        return qs
+    company = conf.user_company(user)
+    return qs.filter(company=company) if company is not None else qs.none()
 
 
 class CompanyListView(generics.ListAPIView):
@@ -118,6 +128,14 @@ class TicketViewSet(viewsets.ModelViewSet):
             created_by=self.request.user,
         )
 
+    def create(self, request, *args, **kwargs):
+        """Create and respond with the full read representation (id, company…)."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        read = TicketSerializer(serializer.instance, context=self.get_serializer_context())
+        return Response(read.data, status=201)
+
 
 class TicketMessageListCreateView(generics.ListCreateAPIView):
     """Chat history for one ticket; new messages also broadcast over WebSocket."""
@@ -127,9 +145,16 @@ class TicketMessageListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return TicketMessage.objects.filter(ticket_id=self.kwargs['ticket_id']).select_related('sender')
+        if not accessible_ticket_qs(self.request.user).filter(
+            pk=self.kwargs['ticket_id']
+        ).exists():
+            raise NotFound('Ticket not found.')
+        return TicketMessage.objects.filter(
+            ticket_id=self.kwargs['ticket_id']
+        ).select_related('sender')
 
     def perform_create(self, serializer):
+        self.get_queryset()
         serializer.save(sender=self.request.user, ticket_id=self.kwargs['ticket_id'])
 
 
@@ -141,9 +166,14 @@ class TicketAttachmentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if not accessible_ticket_qs(self.request.user).filter(
+            pk=self.kwargs['ticket_id']
+        ).exists():
+            raise NotFound('Ticket not found.')
         return TicketAttachment.objects.filter(ticket_id=self.kwargs['ticket_id'])
 
     def perform_create(self, serializer):
+        self.get_queryset()
         upload = self.request.FILES.get('file')
         serializer.save(
             ticket_id=self.kwargs['ticket_id'],

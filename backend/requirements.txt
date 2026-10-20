@@ -1,26 +1,33 @@
-asgiref==3.12.1
+# Support-ticket component dependencies (PostgreSQL in production).
+# Pinned to the versions used in this repo; run `pip install -r requirements.txt`.
+
+# Core
 Django==6.1.2
+asgiref==3.12.1
 sqlparse==0.6.0
+python-dotenv==1.2.4
 
 # REST API
-djangorestframework
-djangorestframework-simplejwt
+djangorestframework==3.18.3
+djangorestframework-simplejwt==5.5.1
+PyJWT==2.15.1
 
 # CORS
-django-cors-headers
+django-cors-headers==4.9.0
 
 # WebSockets / Channels
-channels
-channels-redis
+channels==4.3.2
+channels-redis==4.3.0
+daphne==4.2.3
 
-# ASGI server (HTTP + WebSocket)
-uvicorn[standard]
-daphne
+# ASGI server (HTTP + WebSocket in one process)
+uvicorn[standard]==0.54.0
 
 # PostgreSQL (production)
-psycopg[binary]
-dj-database-url
+psycopg[binary]==3.3.6
+dj-database-url==3.1.2
 
-# S3-compatible storage (Supabase S3-compatible endpoint)
-django-storages
-boto3
+# S3-compatible storage (Supabase / AWS / MinIO) for ticket attachments
+django-storages==1.14.6
+boto3==1.43.114
+botocore==1.43.114

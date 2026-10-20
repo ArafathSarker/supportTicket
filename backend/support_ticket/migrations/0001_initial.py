@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('accounts', '0001_initial'),
+        migrations.swappable_dependency(settings.SUPPORT_TICKET_COMPANY_MODEL),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('open', 'Open'), ('in_progress', 'In progress'), ('resolved', 'Resolved'), ('closed', 'Closed')], db_index=True, default='open', max_length=16)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='support_tickets', to='accounts.company')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='support_tickets', to=settings.SUPPORT_TICKET_COMPANY_MODEL)),
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='support_tickets', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
                 ('work_performed', models.JSONField(default=list, help_text='Checklist of performed work items (labels).')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visiting_logs', to='accounts.company')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visiting_logs', to=settings.SUPPORT_TICKET_COMPANY_MODEL)),
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visiting_logs', to=settings.AUTH_USER_MODEL)),
                 ('ticket', models.ForeignKey(blank=True, help_text='Ticket being acknowledged / followed up by this visit.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='visiting_logs', to='support_ticket.ticket')),
             ],
