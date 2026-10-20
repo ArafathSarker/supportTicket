@@ -101,16 +101,16 @@ function LoadedTicket({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
       <div className="space-y-6">
         <div>
-          <Link to={routes.tickets} className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
+          <Link to={routes.tickets} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
             <ArrowLeft size={14} /> Back to tickets
           </Link>
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold text-slate-900">{ticket.title}</h1>
-              <p className="text-sm text-slate-500">
+              <h1 className="text-2xl font-bold text-slate-900">{ticket.title}</h1>
+              <p className="mt-1 text-sm text-slate-600">
                 #{ticket.id} · {ticket.company_name} · reported by {ticket.created_by_username || '—'}
               </p>
             </div>
@@ -132,21 +132,21 @@ function LoadedTicket({
           </div>
         </div>
 
-        <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">Details</h2>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+        <Card padding={true}>
+          <h2 className="mb-4 text-sm font-semibold text-slate-900">Ticket Details</h2>
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
             <Detail label="Affected system" value={ticket.affected_system} />
-            <Detail label="Category" value={ticket.problem_category} />
-            <Detail label="Urgency / priority" value={`${ticket.urgency} / ${ticket.priority}`} />
+            <Detail label="Problem category" value={ticket.problem_category} />
+            <Detail label="Urgency / Priority" value={`${ticket.urgency} / ${ticket.priority}`} />
           </dl>
-          <div className="mt-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Description</p>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{ticket.description}</p>
+          <div className="mt-6 border-t border-slate-100 pt-6">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Description</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{ticket.description}</p>
           </div>
         </Card>
 
-        <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">Attachments</h2>
+        <Card padding={true}>
+          <h2 className="mb-4 text-sm font-semibold text-slate-900">Attachments</h2>
           <AttachmentsList ticketId={ticket.id} />
         </Card>
       </div>

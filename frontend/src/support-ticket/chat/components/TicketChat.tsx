@@ -38,16 +38,16 @@ export function TicketChat({ ticketId }: { ticketId: number }) {
   }
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col rounded-2xl border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <h3 className="text-sm font-semibold text-slate-900">Live chat</h3>
+    <div className="flex h-full min-h-[420px] flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 bg-slate-50/50 rounded-t-xl">
+        <h3 className="text-sm font-semibold text-slate-900">Live Chat</h3>
         <StatusBar status={status} />
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <p className="py-10 text-center text-sm text-slate-400">
-            No messages yet — say hello to the support team.
+            No messages yet. Start the conversation with the support team.
           </p>
         )}
         {messages.map((m) => {

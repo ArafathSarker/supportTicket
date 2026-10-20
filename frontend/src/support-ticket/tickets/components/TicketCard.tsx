@@ -20,10 +20,10 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
   return (
     <Link
       to={routes.ticketDetail(ticket.id)}
-      className="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-brand-300"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-slate-900">{ticket.title}</h3>
           <p className="mt-0.5 text-xs text-slate-500">
             #{ticket.id} · {ticket.company_name}
@@ -32,22 +32,23 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
         <Badge tone={statusTones[ticket.status]}>{ticket.status.replace('_', ' ')}</Badge>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Badge tone={urgencyTone}>{ticket.urgency}</Badge>
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <Badge tone={urgencyTone}>{ticket.urgency} urgency</Badge>
         <Badge>{ticket.priority} priority</Badge>
-        <Badge>{ticket.problem_category}</Badge>
+        <Badge tone="primary">{ticket.problem_category}</Badge>
+        <Badge tone="neutral">{ticket.affected_system}</Badge>
         {ticket.attachment_count > 0 && (
-          <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600 ring-1 ring-inset ring-slate-500/20">
             <Paperclip size={12} /> {ticket.attachment_count}
           </span>
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
-        <span className="inline-flex items-center gap-1">
+      <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-1.5">
           <User size={12} /> {ticket.created_by_username ?? '—'}
         </span>
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex items-center gap-1.5">
           <CalendarDays size={12} /> {new Date(ticket.created_at).toLocaleString()}
         </span>
       </div>

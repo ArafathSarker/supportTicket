@@ -38,15 +38,15 @@ export function TicketList({ title = 'Tickets' }: { title?: string }) {
     <section>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">{title}</h1>
+          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           <p className="text-sm text-slate-500">{count} ticket{count === 1 ? '' : 's'} total</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative">
-            <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              className="w-56 rounded-lg border-0 bg-white py-2 pl-8 pr-3 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-brand-600"
-              placeholder="Search tickets…"
+              className="w-64 rounded-lg border-0 bg-white py-2.5 pl-8 pr-3 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-brand-600 transition-shadow"
+              placeholder="Search tickets by title or description..."
               value={search}
               onChange={(e) => {
                 setPage(1)
@@ -55,7 +55,7 @@ export function TicketList({ title = 'Tickets' }: { title?: string }) {
             />
           </label>
           <select
-            className="rounded-lg bg-white px-2.5 py-2 text-sm ring-1 ring-inset ring-slate-300"
+            className="rounded-lg bg-white px-3 py-2.5 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-brand-600 transition-shadow"
             value={status}
             onChange={(e) => {
               setPage(1)
@@ -67,7 +67,7 @@ export function TicketList({ title = 'Tickets' }: { title?: string }) {
             ))}
           </select>
           <select
-            className="rounded-lg bg-white px-2.5 py-2 text-sm ring-1 ring-inset ring-slate-300"
+            className="rounded-lg bg-white px-3 py-2.5 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-brand-600 transition-shadow"
             value={urgency}
             onChange={(e) => {
               setPage(1)

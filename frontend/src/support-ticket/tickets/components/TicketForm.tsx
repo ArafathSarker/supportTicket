@@ -75,10 +75,10 @@ export function TicketForm({ onCreated }: TicketFormProps) {
   }
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold text-slate-900">New support ticket</h2>
-      <p className="mt-1 mb-4 text-sm text-slate-500">
-        Describe the problem with the affected system — attachments land in cloud storage.
+    <div>
+      <h2 className="text-lg font-semibold text-slate-900">Create Support Ticket</h2>
+      <p className="mt-1 mb-6 text-sm text-slate-500">
+        Describe the problem with the affected system — attachments are stored securely.
       </p>
 
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -155,14 +155,16 @@ export function TicketForm({ onCreated }: TicketFormProps) {
 
         <FileDrop label="Attachments (picture / video)" onChange={setFiles} />
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {submitting ? 'Submitting…' : 'Submit ticket'}
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 active:bg-brand-800 disabled:opacity-50 transition-all"
+          >
+            {submitting ? 'Submitting…' : 'Submit Ticket'}
+          </button>
+        </div>
       </form>
-    </Card>
+    </div>
   )
 }
