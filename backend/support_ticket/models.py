@@ -68,6 +68,8 @@ class Ticket(models.Model):
     )
 
     title = models.CharField(max_length=255, help_text='Problem summary')
+    sensor_id = models.CharField(max_length=255, help_text='Sensor ID / asset tag')
+    factory_section = models.CharField(max_length=255, help_text='Factory section / location')
     affected_system = models.CharField(max_length=255)
     problem_category = models.CharField(max_length=255)
     urgency = models.CharField(max_length=16, choices=Urgency.choices, default=Urgency.LOW)

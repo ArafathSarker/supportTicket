@@ -33,6 +33,8 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <Badge tone="neutral">{ticket.sensor_id}</Badge>
+        <Badge tone="neutral">{ticket.factory_section}</Badge>
         <Badge tone={urgencyTone}>{ticket.urgency} urgency</Badge>
         <Badge>{ticket.priority} priority</Badge>
         <Badge tone="primary">{ticket.problem_category}</Badge>

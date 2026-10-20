@@ -27,6 +27,8 @@ export function TicketForm({ onCreated }: TicketFormProps) {
 
   const [files, setFiles] = useState<FileDraft[]>([])
   const [title, setTitle] = useState('')
+  const [sensorId, setSensorId] = useState('')
+  const [factorySection, setFactorySection] = useState('')
   const [affectedSystem, setAffectedSystem] = useState('')
   const [newSystem, setNewSystem] = useState('')
   const [problemCategory, setProblemCategory] = useState('')
@@ -43,6 +45,8 @@ export function TicketForm({ onCreated }: TicketFormProps) {
     setErrors({})
     const localErrors: Record<string, string> = {}
     if (!title.trim()) localErrors.title = 'Title is required'
+    if (!sensorId.trim()) localErrors.sensor_id = 'Sensor ID / asset tag is required'
+    if (!factorySection.trim()) localErrors.factory_section = 'Factory section / location is required'
     if (!affectedSystem && !newSystem.trim()) localErrors.affected_system = 'Select or add an affected system'
     if (!problemCategory && !newCategory.trim()) localErrors.problem_category = 'Select or add a problem category'
     setErrors(localErrors)
@@ -54,6 +58,8 @@ export function TicketForm({ onCreated }: TicketFormProps) {
 
     submit({
       title: title.trim(),
+      sensor_id: sensorId.trim(),
+      factory_section: factorySection.trim(),
       affected_system: system,
       problem_category: category,
       urgency,
@@ -64,6 +70,8 @@ export function TicketForm({ onCreated }: TicketFormProps) {
     })
 
     setTitle('')
+    setSensorId('')
+    setFactorySection('')
     setAffectedSystem('')
     setProblemCategory('')
     setUrgency('medium')
@@ -90,6 +98,27 @@ export function TicketForm({ onCreated }: TicketFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           error={errors.title}
         />
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Input
+            id="ticket-sensor-id"
+            label="Sensor ID / Asset Tag"
+            placeholder="e.g. SENS-001"
+            required
+            value={sensorId}
+            onChange={(e) => setSensorId(e.target.value)}
+            error={errors.sensor_id}
+          />
+          <Input
+            id="ticket-factory-section"
+            label="Factory Section / Location"
+            placeholder="e.g. Section A"
+            required
+            value={factorySection}
+            onChange={(e) => setFactorySection(e.target.value)}
+            error={errors.factory_section}
+          />
+        </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">

@@ -20,6 +20,8 @@ export interface Ticket {
   created_by: number
   created_by_username: string
   title: string
+  sensor_id: string
+  factory_section: string
   affected_system: string
   problem_category: string
   urgency: Urgency
@@ -52,6 +54,8 @@ export interface TicketMessage {
 
 export interface Ticket_CreateInput {
   title: string
+  sensor_id: string
+  factory_section: string
   affected_system: string
   problem_category: string
   urgency: Urgency

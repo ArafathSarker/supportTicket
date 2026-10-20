@@ -33,7 +33,7 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = [
             'id', 'company', 'company_name', 'created_by', 'created_by_username',
-            'title', 'affected_system', 'problem_category',
+            'title', 'sensor_id', 'factory_section', 'affected_system', 'problem_category',
             'urgency', 'priority', 'description', 'status',
             'attachment_count', 'created_at', 'updated_at',
         ]
@@ -53,7 +53,7 @@ class TicketCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = [
-            'title', 'affected_system', 'problem_category',
+            'title', 'sensor_id', 'factory_section', 'affected_system', 'problem_category',
             'urgency', 'priority', 'description', 'file', 'file_type',
         ]
 

@@ -114,6 +114,16 @@ function LoadedTicket({
                 #{ticket.id} · {ticket.company_name} · reported by {ticket.created_by_username || '—'}
               </p>
             </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Card className="bg-slate-50">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sensor ID / Asset Tag</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{ticket.sensor_id}</p>
+              </Card>
+              <Card className="bg-slate-50">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Factory Section / Location</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{ticket.factory_section}</p>
+              </Card>
+            </div>
             {isSuperAdmin ? (
               <div className="w-44">
                 <Select

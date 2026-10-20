@@ -22,10 +22,29 @@ const demoUsers = {
   },
 }
 
-/** Demo shell. Select a seeded role with ?user=superadmin or ?user=alpha_admin. */
+const DEMO_USER_KEY = 'support-ticket-demo-user'
+type DemoUsername = keyof typeof demoUsers
+
+function getDemoUsername(): DemoUsername {
+  const fromUrl = new URLSearchParams(window.location.search).get('user')
+  if (fromUrl && fromUrl in demoUsers) {
+    const username = fromUrl as DemoUsername
+    localStorage.setItem(DEMO_USER_KEY, username)
+    return username
+  }
+
+  const stored = localStorage.getItem(DEMO_USER_KEY)
+  if (stored && stored in demoUsers) return stored as DemoUsername
+
+  const defaultUsername: DemoUsername = 'alpha_admin'
+  localStorage.setItem(DEMO_USER_KEY, defaultUsername)
+  return defaultUsername
+}
+
+/** Demo shell. The selected seeded user survives page refreshes. */
 export function AppRoutes() {
-  const username = new URLSearchParams(window.location.search).get('user') ?? 'alpha_admin'
-  const user = demoUsers[username as keyof typeof demoUsers] ?? demoUsers.alpha_admin
+  const username = getDemoUsername()
+  const user = demoUsers[username]
 
   return (
     <BrowserRouter>
