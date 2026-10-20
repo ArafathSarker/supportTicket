@@ -73,10 +73,10 @@ export function TicketChat({ ticketId }: { ticketId: number }) {
         })}
       </div>
 
-      <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-slate-200 p-3">
+      <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-slate-200 p-3 bg-slate-50/50 rounded-b-xl">
         <input
-          className="flex-1 rounded-lg border-0 px-3 py-2 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-brand-600"
-          placeholder="Type a message…"
+          className="flex-1 rounded-lg border-0 px-3.5 py-2.5 text-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-brand-600 transition-shadow"
+          placeholder="Type a message..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
         />
