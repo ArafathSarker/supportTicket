@@ -11,7 +11,6 @@ Environment-driven:
   when the storage credentials are set.
 """
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -44,7 +43,7 @@ INSTALLED_APPS = [
     'channels',
     'storages',
 
-    # host apps (this project only provides auth for the demo)
+    # demo data provider; host projects can omit this app
     'accounts',
 
     # ★ the reusable component — one app, copy & go
@@ -177,17 +176,11 @@ STATIC_URL = 'static/'
 # ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'accounts.authentication.DemoUserAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 # ---------------------------------------------------------------------------

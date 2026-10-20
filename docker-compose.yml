@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-support}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-support}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -34,8 +34,6 @@ services:
       SUPABASE_S3_SECRET_ACCESS_KEY: ${SUPABASE_S3_SECRET_ACCESS_KEY:-}
       SUPABASE_S3_REGION: ${SUPABASE_S3_REGION:-auto}
       SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET:-tickets}
-      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-SuperAdmin#123}
-      COMPANYADMIN_PASSWORD: ${COMPANYADMIN_PASSWORD:-CompanyAdmin#123}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:

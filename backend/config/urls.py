@@ -22,7 +22,6 @@ def api_health(request):
             'options': '/api/options/',
             'companies': '/api/companies/',
             'websocket_chat': '/ws/tickets/<id>/chat/',
-            'login': '/api/accounts/auth/token/',
             'admin': '/admin/',
         },
     })
@@ -32,7 +31,7 @@ urlpatterns = [
     path('', api_health, name='root'),
     path('admin/', admin.site.urls),
 
-    # Demo-only auth (JWT login/refresh). Hosts wire up their own auth instead.
+    # Demo-only seeded identity and company endpoints.
     path('api/accounts/', include('accounts.urls')),
 
     # ★ the support_ticket component — every endpoint mounts from here

@@ -14,7 +14,7 @@ function StatusBar({ status }: { status: ReturnType<typeof useTicketChat>['statu
     )
   }
   if (status === 'connecting') return <span className="text-xs text-slate-500">Connecting…</span>
-  if (status === 'unauthorized') return <span className="text-xs text-red-500">Session expired — re-login</span>
+  if (status === 'unauthorized') return <span className="text-xs text-red-500">Demo user is unavailable</span>
   return <span className="text-xs text-amber-600">Offline — messages send when connected</span>
 }
 

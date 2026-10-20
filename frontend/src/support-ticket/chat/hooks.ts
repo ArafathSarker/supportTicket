@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { getAccessTokenFromConfig, supportRequest } from '../client'
+import { supportRequest } from '../client'
 import { useSupportConfig } from '../context'
 import type { SupportConfig, TicketMessage } from '../types'
 
@@ -9,7 +9,7 @@ export type ChatStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error' | '
 /**
  * Ticket chat over Django Channels:
  * 1. loads history via REST
- * 2. opens /ws/tickets/<id>/chat/?token=<jwt>
+ * 2. opens /ws/tickets/<id>/chat/?user=<seeded-user>
  * 3. streams + sends live messages
  */
 export function useTicketChat(ticketId: number | null) {
@@ -48,14 +48,11 @@ export function useTicketChat(ticketId: number | null) {
   useEffect(() => {
     if (!ticketId || !wsBase) return
 
-    const token = getAccessTokenFromConfig(configRef.current)
-    if (!token) {
-      setStatus('unauthorized')
-      return
-    }
-
     let closedByUs = false
-    const ws = new WebSocket(`${wsBase}/ws/tickets/${ticketId}/chat/?token=${token}`)
+    const username = configRef.current.user?.username ?? 'superadmin'
+    const ws = new WebSocket(
+      `${wsBase}/ws/tickets/${ticketId}/chat/?user=${encodeURIComponent(username)}`,
+    )
     socketRef.current = ws
 
     ws.onopen = () => setStatus('open')

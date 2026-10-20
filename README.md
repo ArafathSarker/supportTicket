@@ -48,13 +48,18 @@ npm run db:init
 The script uses the idempotent query object in
 [`scripts/schema.mjs`](/home/arafath/supportTicket/scripts/schema.mjs).
 
-Demo accounts (created by `seed_demo`):
+Demo identities (created by `seed_demo`):
 
 | user | role | company |
 |---|---|---|
-| `superadmin` / `SuperAdmin#123` | super_admin | (all companies) |
-| `alpha_admin` / `CompanyAdmin#123` | company_admin | Alpha IoT Farms |
-| `greenleaf_admin` / `CompanyAdmin#123` | company_admin | GreenLeaf Cold Chain |
+| `superadmin` | super_admin | (all companies) |
+| `alpha_admin` | company_admin | Alpha IoT Farms |
+| `greenleaf_admin` | company_admin | GreenLeaf Cold Chain |
+
+The demo has no login screen and no credential authentication. It defaults to
+the seeded `superadmin` identity. To exercise company-admin behavior from an
+API client, send `X-Demo-User: alpha_admin` (or `greenleaf_admin`) on requests;
+WebSocket clients use `?user=alpha_admin`.
 
 # Reusing the component in another project
 
@@ -62,7 +67,7 @@ Demo accounts (created by `seed_demo`):
 
 1. **Copy** `backend/support_ticket/` into any Django project (the folder is
    dependency-complete: models, serializers, views, URLs, admin, storage,
-   Channels middleware/routing — no imports from the host or from `accounts`).
+   Channels middleware/routing — no imports from the demo `accounts` app).
 
 2. **Configure** in `settings.py`:
 
@@ -95,11 +100,11 @@ Demo accounts (created by `seed_demo`):
 
    # asgi.py
    from support_ticket.routing import websocket_urlpatterns
-   from support_ticket.middleware import JWTAuthMiddlewareStack
+   from support_ticket.middleware import DemoUserMiddlewareStack
 
    application = ProtocolTypeRouter({
        'http': django_http_app,
-       'websocket': JWTAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+       'websocket': DemoUserMiddlewareStack(URLRouter(websocket_urlpatterns)),
    })
    ```
 

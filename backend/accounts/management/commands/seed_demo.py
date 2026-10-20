@@ -1,6 +1,4 @@
 """Seed demo companies, users (with roles) and dynamic dropdown options."""
-import os
-
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
@@ -32,7 +30,7 @@ class Command(BaseCommand):
         if created:
             sa.is_staff = True
             sa.is_superuser = True
-            sa.set_password(os.getenv('SUPERADMIN_PASSWORD', 'SuperAdmin#123'))
+            sa.set_unusable_password()
             sa.save()
             Profile.objects.create(user=sa, role=Profile.ROLE_SUPER_ADMIN)
             self.stdout.write('Created super admin: superadmin')
@@ -42,7 +40,7 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(username=username)
             if created:
                 user.is_staff = True
-                user.set_password(os.getenv('COMPANYADMIN_PASSWORD', 'CompanyAdmin#123'))
+                user.set_unusable_password()
                 user.save()
                 Profile.objects.create(
                     user=user, role=Profile.ROLE_COMPANY_ADMIN, company=company
