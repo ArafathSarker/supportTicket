@@ -7,8 +7,8 @@ Host projects only need from this file:
 - the storage backend wiring when S3 storage is enabled
 
 Environment-driven:
-- Postgres (dev + production), Redis channel layer when REDIS_URL is set,
-  S3-compatible media storage when the S3 credentials are set.
+- PostgreSQL (development and production) and S3-compatible media storage
+  when the storage credentials are set.
 """
 import os
 from datetime import timedelta
@@ -84,8 +84,7 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 # ---------------------------------------------------------------------------
 # Database — PostgreSQL everywhere (dev + production).
-# Override with DATABASE_URL (docker compose sets it to the `db` service).
-# Default below targets a local Postgres with the compose credentials.
+# Override with DATABASE_URL for the host project's PostgreSQL instance.
 # ---------------------------------------------------------------------------
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -98,23 +97,15 @@ DATABASES = {
 if not str(DATABASES['default'].get('ENGINE', '')).endswith('postgresql'):
     raise ImproperlyConfigured(
         'This project requires PostgreSQL. Set DATABASE_URL to a '
-        'postgres://... URL (see .env.example / docker-compose.yml).'
+        'postgres://... URL (see backend/.env.example).'
     )
 
 # ---------------------------------------------------------------------------
-# Channels — Redis in production, in-memory for dev
+# Channels — in-memory layer keeps the component dependency-free.
 # ---------------------------------------------------------------------------
-if os.getenv('REDIS_URL'):
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {'hosts': [os.getenv('REDIS_URL')]},
-        },
-    }
-else:
-    CHANNEL_LAYERS = {
-        'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'},
-    }
+CHANNEL_LAYERS = {
+    'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'},
+}
 
 # ---------------------------------------------------------------------------
 # ██████  support_ticket component configuration

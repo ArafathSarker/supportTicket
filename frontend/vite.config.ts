@@ -18,15 +18,18 @@ export default defineConfig({
     strictPort: false, // if busy, vite picks the next free port
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
         changeOrigin: true,
       },
       '/ws': {
-        target: 'ws://localhost:8000',
+        target: (process.env.VITE_API_PROXY_TARGET || 'http://localhost:8000').replace(
+          /^http/,
+          'ws',
+        ),
         ws: true,
       },
       '/media': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
         changeOrigin: true,
       },
     },

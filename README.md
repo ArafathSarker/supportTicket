@@ -14,31 +14,39 @@ This repository ships a runnable **demo** (IoT support scenario) around the
 component: Django `accounts` app as the demo auth provider, a Vite host app,
 Docker Compose, and demo seed data.
 
-## Quick start (local dev)
+## Quick start (Docker Compose)
 
-The stack runs on **PostgreSQL** everywhere (no SQLite). Easiest: start the
-compose `db` (+ `redis`) service first, then run Django and Vite locally.
+The complete demo runs with PostgreSQL, Django, and Vite only. It does not
+use Redis or Nginx.
 
 ```bash
-# 0. Start Postgres + Redis from Docker (uses support/support@localhost:5432)
-docker compose up -d db redis
-
-# 1. Backend — http://localhost:8000
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py seed_demo          # demo users + dynamic dropdown options
-uvicorn config.asgi:application --port 8000   # HTTP + WebSocket in one server
-
-# 2. Frontend — http://localhost:5173 (proxies /api and /ws to :8000)
-cd frontend
-npm install
-npm run dev
+docker compose up --build
 ```
 
-A remote/hosted Postgres also works — set `DATABASE_URL` (.env, see
-`.env.example`) and run migrate/seed against it.
+This automatically:
+
+1. Starts PostgreSQL and waits for it to become healthy.
+2. Runs Django migrations and demo seed data.
+3. Starts the Django API and WebSocket server.
+4. Starts the Vite frontend with API and WebSocket proxying.
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8000
+- PostgreSQL: localhost:5432
+
+Copy [backend/.env.example](/home/arafath/supportTicket/backend/.env.example)
+to `backend/.env` when you need custom values. Compose values can also be
+provided in a root `.env` file.
+
+For manual PostgreSQL schema initialization outside Django, use:
+
+```bash
+npm install
+npm run db:init
+```
+
+The script uses the idempotent query object in
+[`scripts/schema.mjs`](/home/arafath/supportTicket/scripts/schema.mjs).
 
 Demo accounts (created by `seed_demo`):
 
@@ -47,18 +55,6 @@ Demo accounts (created by `seed_demo`):
 | `superadmin` / `SuperAdmin#123` | super_admin | (all companies) |
 | `alpha_admin` / `CompanyAdmin#123` | company_admin | Alpha IoT Farms |
 | `greenleaf_admin` / `CompanyAdmin#123` | company_admin | GreenLeaf Cold Chain |
-
-## Quick start (Docker)
-
-```bash
-cp .env.example .env    # optional: add Supabase S3 keys for real file storage
-docker compose up --build
-```
-
-- Frontend → http://localhost:5173 (nginx proxies `/api` + `/ws` to the backend)
-- Backend → http://localhost:8000 (Postgres + Redis come up as companions)
-
----
 
 # Reusing the component in another project
 
