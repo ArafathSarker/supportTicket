@@ -91,41 +91,45 @@ export function TicketForm({ onCreated }: TicketFormProps) {
           error={errors.title}
         />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Select
-            id="ticket-system"
-            label="Affected system"
-            emptyOption={optionsLoading ? 'Loading…' : 'Select system…'}
-            options={systemOptions}
-            value={affectedSystem}
-            onChange={(e) => setAffectedSystem(e.target.value)}
-            error={errors.affected_system}
-            disabled={optionsLoading}
-          />
-          <Input
-            id="ticket-system-custom"
-            label="…or add a new system"
-            placeholder="Type to add dynamically"
-            value={newSystem}
-            onChange={(e) => setNewSystem(e.target.value)}
-          />
-          <Select
-            id="ticket-category"
-            label="Problem category"
-            emptyOption={optionsLoading ? 'Loading…' : 'Select category…'}
-            options={categoryOptions}
-            value={problemCategory}
-            onChange={(e) => setProblemCategory(e.target.value)}
-            error={errors.problem_category}
-            disabled={optionsLoading}
-          />
-          <Input
-            id="ticket-category-custom"
-            label="…or add a new category"
-            placeholder="Type to add dynamically"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-          />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Select
+              id="ticket-system"
+              label="Affected system"
+              emptyOption={optionsLoading ? 'Loading…' : 'Select system…'}
+              options={systemOptions}
+              value={affectedSystem}
+              onChange={(e) => setAffectedSystem(e.target.value)}
+              error={errors.affected_system}
+              disabled={optionsLoading}
+            />
+            <Input
+              id="ticket-system-custom"
+              label="Or add a new system"
+              placeholder="Type to add dynamically"
+              value={newSystem}
+              onChange={(e) => setNewSystem(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Select
+              id="ticket-category"
+              label="Problem category"
+              emptyOption={optionsLoading ? 'Loading…' : 'Select category…'}
+              options={categoryOptions}
+              value={problemCategory}
+              onChange={(e) => setProblemCategory(e.target.value)}
+              error={errors.problem_category}
+              disabled={optionsLoading}
+            />
+            <Input
+              id="ticket-category-custom"
+              label="Or add a new category"
+              placeholder="Type to add dynamically"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+          </div>
           <Select
             id="ticket-urgency"
             label="Urgency level"

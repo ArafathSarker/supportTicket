@@ -117,7 +117,7 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
       </p>
 
       <form onSubmit={onSubmit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Company" error={errors.company} required>
             <select className={selectCls} value={companyId} onChange={(e) => onCompanyChange(e.target.value)}>
               <option value="">Select company…</option>
@@ -145,7 +145,6 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
             required
             value={visitingDate}
             onChange={(e) => setVisitingDate(e.target.value)}
-            className="[&_input]:mt-1"
           />
           <Input
             id="visit-persons"
@@ -164,6 +163,7 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
             value={phones}
             onChange={(e) => setPhones(e.target.value)}
             error={errors.responsible_phone_numbers}
+            className="sm:col-span-2"
           />
         </div>
 
@@ -178,8 +178,8 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
         />
 
         <div>
-          <p className="text-sm font-medium text-slate-700">Select work performed</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <p className="text-sm font-medium text-slate-700 mb-2">Select work performed</p>
+          <div className="grid gap-2 sm:grid-cols-2">
             {optionsLoading && <p className="text-sm text-slate-400">Loading checklist…</p>}
             {!optionsLoading &&
               workItems.map((item) => {
@@ -190,10 +190,10 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
                     key={item}
                     onClick={() => toggleItem(item)}
                     aria-pressed={on}
-                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                    className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-sm transition-all ${
                       on
-                        ? 'border-brand-600 bg-brand-50 text-brand-700'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        ? 'border-brand-600 bg-brand-50 text-brand-700 shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-brand-300 hover:bg-slate-50'
                     }`}
                   >
                     {on ? (
@@ -201,7 +201,7 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
                     ) : (
                       <Circle size={16} className="text-slate-400" />
                     )}
-                    {item}
+                    <span className="flex-1">{item}</span>
                   </button>
                 )
               })}

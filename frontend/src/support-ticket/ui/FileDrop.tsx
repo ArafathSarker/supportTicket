@@ -50,7 +50,7 @@ export function FileDrop({
   return (
     <div>
       <p className="mb-1 block text-sm font-medium text-slate-700">{label}</p>
-      <label className="mt-1 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600 hover:border-brand-500 hover:bg-brand-50">
+      <label className="mt-1 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50/50 px-4 py-8 text-center text-sm text-slate-600 hover:border-brand-500 hover:bg-brand-50 transition-colors">
         <Paperclip size={16} />
         Attach picture or video
         <input
