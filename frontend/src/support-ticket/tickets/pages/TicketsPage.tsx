@@ -5,7 +5,7 @@ import { TicketForm } from '../components/TicketForm'
 import { TicketList } from '../components/TicketList'
 import { useSupportConfig } from '../../context'
 
-/** Tickets screen — role-aware: company users see & create own tickets, super admin sees all. */
+/** Tickets screen — company users create requests; super admins review requests. */
 export function TicketsPage() {
   const [showForm, setShowForm] = useState(false)
   const { user } = useSupportConfig()
@@ -17,7 +17,7 @@ export function TicketsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Support Tickets</h1>
           <p className="mt-1 text-sm text-slate-600">
-            {isCompanyAdmin ? 'Manage your support requests' : 'Review and manage all support requests'}
+            {isCompanyAdmin ? 'Manage your support requests' : 'Review requests from company owners'}
           </p>
         </div>
         {isCompanyAdmin && (

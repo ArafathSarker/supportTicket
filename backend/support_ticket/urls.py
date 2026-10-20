@@ -6,7 +6,7 @@ All component URL routes. The host mounts them wherever it likes::
 
 Resulting endpoints (relative to the mount point, e.g. /api/):
 
-    GET  tickets/                     role-scoped, paginated (?status=&urgency=&priority=&search=&company=)
+    GET  tickets/                     company-request queue for super admins; own company for company users
     POST tickets/                     company user create (multipart ok: file + file_type)
     GET  tickets/<id>/                retrieve
     PATCH tickets/<id>/               status change (super admin)

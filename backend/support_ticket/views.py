@@ -40,6 +40,18 @@ def accessible_ticket_qs(user):
     return qs.filter(company=company) if company is not None else qs.none()
 
 
+def company_request_ticket_qs(qs):
+    """Keep the super-admin queue limited to company-owner requests."""
+    from django.contrib.auth import get_user_model
+
+    requester_ids = [
+        user.pk
+        for user in get_user_model().objects.only('pk')
+        if conf.is_company_admin(user)
+    ]
+    return qs.filter(created_by_id__in=requester_ids)
+
+
 class CompanyListView(generics.ListAPIView):
     """GET companies/ — dropdown source for forms (role-scoped)."""
 
@@ -90,6 +102,7 @@ class TicketViewSet(viewsets.ModelViewSet):
             company = conf.user_company(self.request.user)
             qs = Ticket.objects.none() if company is None else qs.filter(company=company)
         else:
+            qs = company_request_ticket_qs(qs)
             company_id = params.get('company')
             if company_id:
                 qs = qs.filter(company_id=company_id)

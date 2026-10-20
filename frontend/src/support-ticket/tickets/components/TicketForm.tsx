@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Card, FileDrop, Input, Select, Textarea, type FileDraft } from '../../ui'
+import { FileDrop, Input, Select, Textarea, type FileDraft } from '../../ui'
 import { useOptions } from '../../options'
 import { LEVELS } from '../api'
 import { useCreateTicket } from '../hooks'
