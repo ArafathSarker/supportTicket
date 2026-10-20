@@ -7,6 +7,7 @@ const tones = {
   warning: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   danger: 'bg-red-50 text-red-700 ring-red-600/20',
   critical: 'bg-red-600 text-white ring-red-700/40',
+  primary: 'bg-brand-50 text-brand-700 ring-brand-600/20',
 } as const
 
 export type Tone = keyof typeof tones
@@ -18,17 +19,17 @@ export function Badge({
 }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tones[tone]} ${className ?? ''}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${tones[tone]} ${className ?? ''}`}
     >
       {children}
     </span>
   )
 }
 
-export function Card({ className, children }: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
+export function Card({ className, children, padding = true }: HTMLAttributes<HTMLDivElement> & { children: ReactNode; padding?: boolean }) {
   return (
     <div
-      className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${className ?? ''}`}
+      className={`rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md ${padding ? 'p-6' : ''} ${className ?? ''}`}
     >
       {children}
     </div>

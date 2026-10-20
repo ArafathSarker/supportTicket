@@ -221,9 +221,15 @@ class VisitingLogListCreateView(generics.ListCreateAPIView):
 
 
 class VisitingLogDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = VisitingLog.objects.all()
     serializer_class = VisitingLogSerializer
     pagination_class = SupportPagination
+
+    def get_queryset(self):
+        qs = VisitingLog.objects.select_related('company', 'ticket', 'created_by')
+        if conf.is_super_admin(self.request.user):
+            return qs
+        company = conf.user_company(self.request.user)
+        return qs.filter(company=company) if company is not None else qs.none()
 
     def get_permissions(self):
         if self.request.method in ('PUT', 'PATCH', 'DELETE'):

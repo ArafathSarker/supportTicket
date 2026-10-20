@@ -29,22 +29,22 @@ export function Pagination({
   return (
     <nav className={`flex items-center justify-between gap-2 ${className ?? ''}`} aria-label="Pagination">
       <p className="text-sm text-slate-600">
-        Showing <span className="font-medium">{start}–{end}</span> of{' '}
-        <span className="font-medium">{count}</span>
+        Showing <span className="font-medium text-slate-900">{start}–{end}</span> of{' '}
+        <span className="font-medium text-slate-900">{count}</span>
       </p>
       <div className="flex items-center gap-1">
         <button
           type="button"
-          className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
           aria-label="Previous page"
         >
           <ChevronLeft size={16} />
         </button>
-        {numbers.map((n) =>
+        {numbers.map((n, idx) =>
           n === '…' ? (
-            <span key={n} className="px-1 text-slate-400">
+            <span key={`ellipsis-${idx}`} className="px-2 text-slate-400">
               …
             </span>
           ) : (
@@ -52,7 +52,7 @@ export function Pagination({
               key={n}
               type="button"
               onClick={() => onPage(n)}
-              className={`min-w-8 rounded-md px-2 py-1 text-sm font-medium ${
+              className={`min-w-9 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors ${
                 n === page ? 'bg-brand-600 text-white' : 'text-slate-700 hover:bg-slate-100'
               }`}
               aria-current={n === page ? 'page' : undefined}
@@ -63,7 +63,7 @@ export function Pagination({
         )}
         <button
           type="button"
-          className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
           onClick={() => onPage(page + 1)}
           disabled={page >= pages}
           aria-label="Next page"

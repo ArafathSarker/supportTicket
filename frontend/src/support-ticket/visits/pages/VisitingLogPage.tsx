@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { VisitingLogForm } from '../components/VisitingLogForm'
-import { VisitingReportList } from '../components/VisitingReportList'
 
 /** Visiting-log screen — super admin creates acknowledgement visits sent to the company. */
 export function VisitingLogPage() {
@@ -14,7 +13,6 @@ export function VisitingLogPage() {
         </p>
       )}
       <VisitingLogForm onSaved={() => setSaved(true)} />
-      <VisitingReportList role="super_admin" />
     </div>
   )
 }

@@ -1,9 +1,14 @@
 /** Brand accent tokens for the support-ticket component.
  * Hosts override `--color-brand-*` in their own CSS to re-skin it. */
 @theme {
-  --color-brand-50: oklch(0.966 0.03 250);
-  --color-brand-100: oklch(0.93 0.05 250);
+  --color-brand-50: oklch(0.97 0.02 250);
+  --color-brand-100: oklch(0.94 0.04 250);
+  --color-brand-200: oklch(0.88 0.08 250);
+  --color-brand-300: oklch(0.78 0.12 250);
+  --color-brand-400: oklch(0.69 0.15 250);
   --color-brand-500: oklch(0.62 0.17 255);
   --color-brand-600: oklch(0.55 0.18 255);
   --color-brand-700: oklch(0.48 0.17 255);
+  --color-brand-800: oklch(0.42 0.16 255);
+  --color-brand-900: oklch(0.36 0.14 255);
 }

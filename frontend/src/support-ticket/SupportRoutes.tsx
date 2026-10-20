@@ -36,8 +36,15 @@ export function SupportRoutes() {
           }
         />
 
-        {/* both roles; the role prop distinguishes the view */}
-        <Route path="visiting-report" element={<VisitingReportPage />} />
+        {/* Company owners receive the super-admin acknowledgement here. */}
+        <Route
+          path="visiting-report"
+          element={
+            <RequireRole roles={['company_admin']}>
+              <VisitingReportPage role="company_admin" />
+            </RequireRole>
+          }
+        />
 
         <Route path="*" element={<RedirectToTickets />} />
       </Route>
