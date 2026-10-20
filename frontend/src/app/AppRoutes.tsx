@@ -1,39 +1,52 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { RequireAuth, RequireRole } from '@/components/layout/RequireAuth'
-import { AppLayout } from '@/components/layout/AppLayout'
-import { LoginPage } from '@/features/auth'
-import { TicketsPage, TicketDetailPage } from '@/features/tickets'
-import { VisitingLogPage, VisitingReportPage } from '@/features/visits'
+import { SupportProvider, SupportRoutes } from '@/support-ticket'
+import { LoginPage } from '@/auth/LoginPage'
+import { clearSession, getStoredUser, getToken, type SessionUser } from '@/lib/session'
 
+/**
+ * Demo app shell: a login screen (host-owned) + the whole reusable
+ * support-ticket component mounted with config + auth wiring in one place.
+ */
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
-        <Route element={<RequireAuth />}>
-          <Route element={<AppLayout />}>
-            <Route path="/tickets" element={<TicketsPage />} />
-            <Route path="/tickets/:id" element={<TicketDetailPage />} />
-
-            {/* super admin only */}
-            <Route
-              path="/visiting-log"
-              element={
-                <RequireRole roles={['super_admin']}>
-                  <VisitingLogPage />
-                </RequireRole>
-              }
-            />
-
-            {/* both roles; the role prop distinguishes the view */}
-            <Route path="/visiting-report" element={<VisitingReportPage />} />
-
-            <Route index element={<Navigate to="/tickets" replace />} />
-            <Route path="*" element={<Navigate to="/tickets" replace />} />
-          </Route>
-        </Route>
+        {/* ★ the whole support-ticket component, wired with the demo session */}
+        <Route path="*" element={<ProtectedSupport />} />
       </Routes>
     </BrowserRouter>
+  )
+}
+
+function ProtectedSupport() {
+  const user: SessionUser | null = getStoredUser()
+
+  if (!user) return <Navigate to="/login" replace />
+
+  return (
+    <SupportProvider
+      config={{
+        apiBase: '/api',
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          companyName: user.company_name,
+        },
+        getAuthHeaders: () => ({ Authorization: `Bearer ${getToken()}` }),
+        getAccessToken: getToken,
+        onUnauthorized: () => {
+          clearSession()
+          window.location.assign('/login')
+        },
+        onLogout: () => clearSession(),
+        loginPath: '/login',
+        branding: { title: 'IoT Support' },
+      }}
+    >
+      <SupportRoutes />
+    </SupportProvider>
   )
 }

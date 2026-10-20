@@ -1,20 +1,24 @@
 """
-Django settings for config project.
+Demo Django settings for the support_ticket component.
 
-Environment-driven settings:
+Host projects only need from this file:
+- INSTALLED_APPS += ['support_ticket']
+- a SUPPORT_TICKET dict (hooks + optional storage credentials)
+- the storage backend wiring when S3 storage is enabled
+
+Environment-driven:
 - Dev:   SQLite + in-memory channel layer + local file storage
-- Prod:  Postgres + Redis channel layer + Supabase (S3-compatible) storage
+- Prod:  Postgres + Redis channel layer + S3-compatible storage
 """
 import os
 from datetime import timedelta
-
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv(
     'DJANGO_SECRET_KEY',
@@ -40,12 +44,11 @@ INSTALLED_APPS = [
     'channels',
     'storages',
 
-    # local apps
+    # host apps (this project only provides auth for the demo)
     'accounts',
-    'core',
-    'tickets',
-    'visits',
-    'chat',
+
+    # ★ the reusable component — one app, copy & go
+    'support_ticket',
 ]
 
 MIDDLEWARE = [
@@ -83,7 +86,8 @@ ASGI_APPLICATION = 'config.asgi.application'
 # Database — Postgres in production, SQLite for local dev
 # ---------------------------------------------------------------------------
 if os.getenv('DATABASE_URL'):
-    import dj_database_url  # provided by psycopg ecosystem / dj-database-url
+    import dj_database_url
+
     DATABASES = {'default': dj_database_url.parse(os.getenv('DATABASE_URL'))}
 else:
     DATABASES = {
@@ -109,21 +113,40 @@ else:
     }
 
 # ---------------------------------------------------------------------------
-# Storage — Supabase S3-compatible in production, local media in dev
+# ██████  support_ticket component configuration
+# ---------------------------------------------------------------------------
+# COMPANY_MODEL    — related company/org model in the host project
+# ROLE_RESOLVER    — (user) -> 'super_admin' | 'company_admin' | ''
+# COMPANY_RESOLVER — (user) -> company instance the user belongs to (or None)
+# COMPANY_SERIALIZER — optional override serializer for GET /api/companies/
+# PAGE_SIZE        — page size for the component's list endpoints
+# S3_*             — credentials for the S3-compatible attachment storage
+SUPPORT_TICKET = {
+    'COMPANY_MODEL': 'accounts.Company',
+    'ROLE_RESOLVER': 'accounts.support.resolve_role',
+    'COMPANY_RESOLVER': 'accounts.support.resolve_company',
+    'PAGE_SIZE': 10,
+    'S3_ENDPOINT_URL': os.getenv('SUPABASE_S3_ENDPOINT_URL', ''),
+    'S3_ACCESS_KEY_ID': os.getenv('SUPABASE_S3_ACCESS_KEY_ID', ''),
+    'S3_SECRET_ACCESS_KEY': os.getenv('SUPABASE_S3_SECRET_ACCESS_KEY', ''),
+    'S3_REGION': os.getenv('SUPABASE_S3_REGION', 'auto'),
+    'S3_BUCKET': os.getenv('SUPABASE_STORAGE_BUCKET', 'tickets'),
+}
+
+# ---------------------------------------------------------------------------
+# Storage — S3-compatible in production, local media in dev
 # ---------------------------------------------------------------------------
 if os.getenv('SUPABASE_S3_ENDPOINT_URL'):
     STORAGES = {
         'default': {
-            'BACKEND': 'core.storages.SupabaseS3Storage',
+            'BACKEND': 'support_ticket.storage.SupportS3Storage',
         },
         'staticfiles': {
             'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         },
     }
-    # Admin & static assets still need local/static handling
     STATIC_URL = 'static/'
     STATIC_ROOT = BASE_DIR / 'staticfiles'
-
     MEDIA_URL = '/'  # unused; URLs come from the storage backend
 else:
     STORAGES = {
@@ -151,7 +174,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # ---------------------------------------------------------------------------
-# DRF
+# DRF — the component ships its own pagination classes so list page sizes
+# don't depend on this global (kept here for the demo's own endpoints).
 # ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -160,8 +184,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
 }
 
 SIMPLE_JWT = {
@@ -178,17 +200,3 @@ CSRF_TRUSTED_ORIGINS = [FRONTEND_URL]
 
 # Ticket / visit attachments
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400  # 25 MB
-
-# Supabase S3-compatible storage credentials (prod)
-SUPABASE_S3_ENDPOINT_URL = os.getenv('SUPABASE_S3_ENDPOINT_URL', '')      # https://<ref>.supabase.co/storage/v1/s3
-SUPABASE_S3_ACCESS_KEY_ID = os.getenv('SUPABASE_S3_ACCESS_KEY_ID', '')
-SUPABASE_S3_SECRET_ACCESS_KEY = os.getenv('SUPABASE_S3_SECRET_ACCESS_KEY', '')
-SUPABASE_S3_REGION = os.getenv('SUPABASE_S3_REGION', 'auto')
-SUPABASE_STORAGE_BUCKET = os.getenv('SUPABASE_STORAGE_BUCKET', 'tickets')
-
-# Email
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}

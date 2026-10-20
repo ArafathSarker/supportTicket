@@ -1,23 +1,26 @@
-# IoT Support Ticket System
+# Support Ticket System
 
-IoT-based support system: companies raise support tickets for their deployed IoT
-systems, the super-admin acknowledges them with on-site visiting logs, and both
-sides can chat live about a ticket.
+A reusable, drop-in **support-ticket component** for any project:
 
-- **Backend** — Django 6 + DRF + Django Channels (WebSocket chat), JWT auth,
-  PostgreSQL in production, S3-compatible storage via Supabase.
-- **Frontend** — Vite + React 19 + Tailwind CSS 4, modular feature-folder
-  architecture, paginated lists everywhere.
+- **Backend** — a single pluggable Django app `support_ticket/` (tickets with
+  S3-compatible attachments, visiting logs, dynamic dropdowns, WebSocket chat).
+  Decoupled from the host project: user/role/company are resolved through
+  configurable hooks.
+- **Frontend** — a single self-contained module `src/support-ticket/`
+  (React + Tailwind 4). One barrel export, one `<SupportProvider>` for
+  endpoints/auth/branding, ready-made pages + à-la-carte components.
+
+This repository ships a runnable **demo** (IoT support scenario) around the
+component: Django `accounts` app as the demo auth provider, a Vite host app,
+Docker Compose, and demo seed data.
 
 ## Quick start (local dev)
-
-Two terminals:
 
 ```bash
 # 1. Backend — http://localhost:8000
 cd backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r requrements.txt
+pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_demo          # demo users + dynamic dropdown options
 uvicorn config.asgi:application --port 8000   # HTTP + WebSocket in one server
@@ -46,96 +49,139 @@ docker compose up --build
 - Frontend → http://localhost:5173 (nginx proxies `/api` + `/ws` to the backend)
 - Backend → http://localhost:8000 (Postgres + Redis come up as companions)
 
+---
+
+# Reusing the component in another project
+
+## Backend: single Django app
+
+1. **Copy** `backend/support_ticket/` into any Django project (the folder is
+   dependency-complete: models, serializers, views, URLs, admin, storage,
+   Channels middleware/routing — no imports from the host or from `accounts`).
+
+2. **Configure** in `settings.py`:
+
+   ```python
+   INSTALLED_APPS = [..., 'support_ticket']
+
+   SUPPORT_TICKET = {
+       # Company/org model of the host project ('<app>.<Model>')
+       'COMPANY_MODEL': 'myapp.Organization',
+       # (user) -> 'super_admin' | 'company_admin' | ''
+       'ROLE_RESOLVER': 'myapp.support.resolve_role',
+       # (user) -> the company instance the user belongs to, or None
+       'COMPANY_RESOLVER': 'myapp.support.resolve_company',
+       # optional: custom serializer for the companies dropdown
+       # 'COMPANY_SERIALIZER': 'myapp.serializers.CompanySerializer',
+       'PAGE_SIZE': 10,
+   }
+   ```
+
+   Defaults work without any host hooks: Django superusers are `super_admin`,
+   everyone else `company_admin` (with no company until a resolver is set).
+
+3. **Mount** the routes and ASGI app:
+
+   ```python
+   # urls.py
+   path('api/', include('support_ticket.urls')),
+
+   # asgi.py
+   from support_ticket.routing import websocket_urlpatterns
+   from support_ticket.middleware import JWTAuthMiddlewareStack
+
+   application = ProtocolTypeRouter({
+       'http': django_http_app,
+       'websocket': JWTAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+   })
+   ```
+
+4. **Storage** — attachments go to local `/media` by default. To store them in
+   an S3-compatible bucket (Supabase, AWS, MinIO…):
+
+   ```python
+   SUPPORT_TICKET.update({
+       'S3_ENDPOINT_URL': 'https://<ref>.supabase.co/storage/v1/s3',
+       'S3_ACCESS_KEY_ID': '...',
+       'S3_SECRET_ACCESS_KEY': '...',
+       'S3_REGION': 'auto',
+       'S3_BUCKET': 'tickets',
+   })
+   STORAGES = {'default': {'BACKEND': 'support_ticket.storage.SupportS3Storage'}}
+   ```
+
+5. **Migrate** — `python manage.py makemigrations support_ticket && python manage.py migrate`
+   (migrations live inside the app; added keys become options in `/api/options/`).
+
+REST endpoints (relative to the mount point, all JWT-authenticated):
+
+```
+GET/POST tickets/                     role-scoped (?status=&urgency=&priority=&search=&company=)
+GET/PATCH tickets/<id>/               status change = super admin
+GET/POST tickets/<id>/messages/       chat history / send message
+GET/POST tickets/<id>/attachments/    attachment list / upload
+GET/POST visiting-logs/               role-scoped; POST = super admin acknowledgement
+GET/PATCH/DELETE visiting-logs/<id>/
+GET  options/                         dynamic dropdown values grouped by key
+GET  companies/                       company dropdown (role-scoped)
+WS   /ws/tickets/<id>/chat/?token=<jwt>
+```
+
+Dynamic dropdowns (affected systems, problem categories, work-performed
+checklist): rows of `DynamicOption` in Django admin — the frontend picks them
+up with no redeploy.
+
+## Frontend: one folder
+
+1. **Copy** `frontend/src/support-ticket/` into any React (≥18) + Tailwind 4
+   project. Everything — api client, types, hooks, screens, UI primitives,
+   brand CSS — is inside the folder; the only imports from outside are
+   `react`, `react-router-dom`, `lucide-react` and Tailwind itself.
+
+2. **Import the styles once** (or override the `--color-brand-*` tokens):
+
+   ```css
+   @import 'tailwindcss';
+   @import './support-ticket/styles.css';
+   ```
+
+3. **Wire it** (auth/branding/routing all come from the host):
+
+   ```tsx
+   import { SupportProvider, SupportRoutes } from '@/support-ticket'
+
+   <SupportProvider config={{
+     apiBase: '/api',                       // REST base (default '/api')
+     wsBase: 'wss://host',                  // WebSocket origin for chat
+     user: { id: 2, username: 'acme', role: 'company_admin', companyName: 'Acme' },
+     getAuthHeaders: () => ({ Authorization: `Bearer ${token}` }),
+     getAccessToken: () => token,           // for the WebSocket ?token= auth
+     onUnauthorized: () => redirectToLogin(),
+     onLogout: () => clearSession(),
+     loginPath: '/login',
+     basePath: '',                          // set when mounted under a prefix
+     branding: { title: 'My Support' },
+   }}>
+     <SupportRoutes />    // place inside your <Routes>, e.g. <Route path="/support/*" element={<SupportRoutes/>} />
+   </SupportProvider>
+   ```
+
+   Screens are also exported à la carte: `TicketsPage`, `TicketDetailPage`,
+   `VisitingLogPage`, `VisitingReportPage` (takes the `role` prop), `TicketForm`,
+   `TicketList`, `TicketDetail`, `TicketChat`, `useOptions`, the API objects and
+   hooks, plus the `ui` primitives (`Button`, `Input`, `Select`, `FileDrop`,
+   `Pagination`, `Badge`, `Card`, `Loading`, `Empty`…).
+
+## Demo-only files (safe to ignore)
+
+```
+backend/accounts/      # demo auth (JWT login) + hook resolvers feeding the component
+backend/config/        # demo project settings/urls/asgi
+frontend/src/auth/     # demo login screen + session store
+frontend/src/lib/      # demo session storage
+frontend/src/app/      # demo app shell (Router + SupportProvider wiring)
+seed_demo              # demo users/companies + option values
+```
+
 > Add your Supabase S3-compatible key set (`SUPABASE_S3_*`) to `.env` to switch
 > ticket attachments from local `/media` storage to the S3 bucket automatically.
-
-## Screens / routes
-
-| Route | Who | What |
-|---|---|---|
-| `/login` | – | JWT login (role + company resolved) |
-| `/tickets` | both | Paginated ticket list w/ filters; company admins create tickets here (title, dynamic affected system & category dropdowns, urgency/priority, description, image/video upload) |
-| `/tickets/:id` | both | Ticket detail, attachments, status control (super admin), **live chat** |
-| `/visiting-log` | super admin | Acknowledgement: company, visiting date, persons, phones, reason, dynamic work-performed checklist |
-| `/visiting-report` | both | Visiting reports; the `role` prop from auth session distinguishes super-admin vs company view |
-
-## Frontend architecture (modular)
-
-```
-frontend/src/
-├── main.tsx, App.tsx
-├── app/               # router composition (AppRoutes)
-├── lib/               # api client (auth, refresh, errors), config, pagination
-├── types/             # shared types (auth/user)
-├── components/
-│   ├── ui/            # Button, Field/Input/Select/Textarea, Badge, Card,
-│   │                  # Pagination, FileDrop, Status loaders
-│   └── layout/        # AppLayout (nav), RequireAuth, RequireRole
-└── features/
-    ├── auth/          # api, hooks (useAuth), LoginPage
-    ├── options/       # dynamic dropdown loader (/api/options/)
-    ├── tickets/       # api.ts, hooks.ts, types.ts
-    │   ├── components/ # TicketForm, TicketList, TicketCard, TicketDetail
-    │   └── pages/      # TicketsPage, TicketDetailPage
-    ├── visits/        # api.ts, hooks.ts, types.ts, constants.ts
-    │   ├── components/ # VisitingLogForm, VisitingReportList (role prop)
-    │   └── pages/      # VisitingLogPage, VisitingReportPage
-    └── chat/          # WebSocket hook (useTicketChat), TicketChat
-```
-
-Rules of the architecture:
-
-- `components/ui` never imports from `features/*` (pure presentational).
-- Each feature owns its API client, types, hooks, components and pages behind an
-  `index.ts` barrel — cross-feature imports go through the barrel.
-- Pagination: server-side via DRF `PageNumberPagination` (`?page=`), with the
-  shared `Pagination` component in `components/ui`.
-- Dynamic dropdowns (systems, categories, work-performed checklist) come from
-  the backend `DynamicOption` table — add a row in Django admin or `seed_demo`
-  and the frontend picks it up, no redeploy.
-
-## Backend architecture
-
-```
-backend/
-├── config/        # settings (env-driven: sqlite↔postgres, memory↔redis, media↔s3),
-│                  # urls, asgi (HTTP → Django, WS → Channels)
-├── accounts/      # Company, Profile(role), JWT auth, /me, companies list
-├── core/          # DynamicOption (config for dropdowns), Supabase S3 storage
-├── tickets/       # Ticket, TicketAttachment (S3), TicketMessage; viewsets+filters
-├── visits/        # VisitingLog (acknowledgement), role-aware API
-└── chat/          # JWT-auth middleware, TicketChatConsumer, ws routing
-```
-
-REST endpoints (all JWT, `Authorization: Bearer <access>`):
-
-```
-POST  /api/accounts/auth/token/          # login → access/refresh + user(role)
-GET   /api/accounts/me/                  # current user + role
-GET   /api/accounts/companies/           # company dropdown (visiting log)
-GET   /api/options/                      # dynamic dropdown values by key
-GET   /api/tickets/?page=&status=&search=# role-scoped (company vs all)
-POST  /api/tickets/                      # multipart ok (file + file_type)
-GET   /api/tickets/<id>/
-PATCH /api/tickets/<id>/                 # status change (super admin)
-GET   /api/tickets/<id>/messages/        # chat history
-GET   /api/tickets/<id>/attachments/     # attachment list (S3 URLs)
-GET   /api/visiting-logs/?page=&company= # role-scoped
-POST  /api/visiting-logs/                # super admin only
-WS    /ws/tickets/<id>/chat/?token=<jwt> # live chat (Channels)
-```
-
-Roles: `super_admin` (sees everything, updates status, creates visiting logs)
-and `company_admin` (own company's tickets only). A Django superuser is treated
-as super_admin.
-
-## Creating dynamic dropdown values
-
-Django admin (`/admin/`, superadmin is staff) → **Dynamic options**:
-
-- key `system` – affected systems
-- key `category` – problem categories
-- key `work_performed` – work-performed checklist items
-
-`seed_demo` preloads sensible IoT defaults; add more rows any time — the
-frontend dropdowns/checklists update instantly.

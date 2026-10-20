@@ -39,5 +39,3 @@ use docker for all frontend and backend .
 
 
 use proper pagination in the frontend ok 
-
-opencode -s ses_eac605872ffeGrG5jiPSO3IbOK
