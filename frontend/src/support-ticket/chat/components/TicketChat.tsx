@@ -62,7 +62,7 @@ export function TicketChat({ ticketId }: { ticketId: number }) {
                 <span>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <div
-                className={`mt-1 max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm ${
+                className={`mt-1 max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
                   mine ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-800'
                 }`}
               >
