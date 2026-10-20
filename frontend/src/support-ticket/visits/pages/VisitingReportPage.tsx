@@ -10,5 +10,15 @@ import type { Role } from '../../types'
 export function VisitingReportPage({ role }: { role?: Role }) {
   const { user } = useSupportConfig()
   const resolved: Role = role ?? user?.role ?? 'company_admin'
-  return <VisitingReportList role={resolved} />
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Visiting Reports</h1>
+        <p className="mt-1 text-sm text-slate-600">
+          {resolved === 'super_admin' ? 'All acknowledgement visits logged' : 'Acknowledgements sent by the support team'}
+        </p>
+      </div>
+      <VisitingReportList role={resolved} />
+    </div>
+  )
 }

@@ -110,9 +110,9 @@ export function VisitingLogForm({ onSaved }: { onSaved?: () => void }) {
   }
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold text-slate-900">New visiting log</h2>
-      <p className="mt-1 mb-4 text-sm text-slate-500">
+    <Card padding={true}>
+      <h2 className="text-lg font-semibold text-slate-900">New Visiting Log</h2>
+      <p className="mt-1 mb-6 text-sm text-slate-500">
         Acknowledge a company's ticket with the details of the on-site visit.
       </p>
 

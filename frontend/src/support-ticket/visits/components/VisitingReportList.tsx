@@ -23,16 +23,14 @@ export function VisitingReportList({ role }: VisitingReportListProps) {
 
   return (
     <section>
-      <h1 className="mb-1 text-xl font-bold text-slate-900">Visiting reports</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        {role === 'super_admin'
-          ? 'All acknowledgement visits you logged'
-          : 'Acknowledgements sent by the support team'}
-      </p>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-900">Reports</h2>
+        <p className="text-sm text-slate-500">{count} report{count === 1 ? '' : 's'}</p>
+      </div>
 
       <div className="space-y-3">
         {results.map((log) => (
-          <Card key={log.id} className="p-5">
+          <Card key={log.id} padding={true} className="p-5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">

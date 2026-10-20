@@ -81,7 +81,7 @@ export function TicketForm({ onCreated }: TicketFormProps) {
         Describe the problem with the affected system — attachments are stored securely.
       </p>
 
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form onSubmit={onSubmit} className="space-y-5" noValidate>
         <Input
           id="ticket-title"
           label="Title / problem summary"
